@@ -1,0 +1,89 @@
+#!/bin/bash
+
+info="getinfo"
+create="create"
+list="list"
+
+
+if [ "$2" == "$info" ]; then
+	case $1 in
+	
+	cpu)
+	lscpu
+	;;
+	
+	memory)
+	free
+	;;
+	
+	file)
+	if [ -n "$3" ] && [ -n "$4" ]; then
+		case $3 in
+		
+		--size| -s)
+		echo "Size(B):	$(stat -c "%s" $4)"
+		;;
+		
+		--permissions| -p)
+		echo "Access:		$(stat -c "%A" $4)"
+		;;
+		
+		--owner| -o)
+		echo "Owner:		$(stat -c "%U" $4)"
+		;;
+		
+		--last-modified| -m)
+		echo "Modify:		$(stat -c "%y" $4)"
+		;;
+		
+		*)
+		echo -n "unknown second arguement"
+		;;
+    	esac
+		
+	else
+	echo "File:		$3"
+	echo "Access:		$(stat -c "%A" $3)"
+	
+	echo "Size(B):	$(stat -c "%s" $3)"
+	
+	echo "Owner:		$(stat -c "%U" $3)"
+	echo "Modify:		$(stat -c "%y" $3)"
+	fi
+	;;
+	
+	*)
+    echo -n "unknown second arguement"
+    ;;
+    esac
+	
+	elif [ "$2" == "$create" ] && [ "$1" == "user" ]; then
+	sudo adduser $3
+	
+	elif [ "$2" == "$list" ] && [ "$1" == "user" ]; then
+	if [ -n "$3" ] && [ "$3" == "--sudo-only" ]; then
+	getent group sudo
+	else
+	echo "$(awk -F: '$3 >= 1000 && $3 <= 65534' /etc/passwd)"
+	fi
+	
+	elif [ "$1" == "--version" ]; then
+	echo "v0.1.0"
+	
+	
+	elif [ "$1" == "--help" ]; then
+	 echo "Usage: $0 [OPTIONS]"
+	echo "Options:"
+	echo "--help                                Display this help message"
+	echo "--version                             Display version"
+	echo "cpu getinfo                           Display cpuinfo"
+	echo "memory getinfo                        Display memory info"
+	echo "user list                             Display users"
+	echo "user list --sudo-only                 Display sudo users"
+	echo "user create <username>                create a new user"
+	echo "file getinfo <filename>               Display file info"
+	echo "file getinfo [Options] <filename>     Display file info with flags"
+	
+fi
+	
+
